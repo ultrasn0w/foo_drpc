@@ -17,4 +17,5 @@ Foobar2000 music status for Discord Rich Presence!
 
 # License and Warranty
 Check [LICENSE](../master/LICENSE).
+
 Note: Even though I build in a "spam protection" to avoid lots of presence updates being send to the discord servers, I can't guarantee and am not responsible for any actions that may be taken against your account. (Nothing happened during personal testing)
