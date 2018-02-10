@@ -4,8 +4,8 @@
 
 DECLARE_COMPONENT_VERSION(
 "foo_drpc",
-"0.1",
-"© 2017 - ultrasn0w");
+"0.3",
+"Foobar2000 music status for Discord Rich Presence! (c) 2018 - ultrasn0w");
 
 static initquit_factory_t<foo_drpc> foo_interface;
 static std::chrono::time_point<std::chrono::high_resolution_clock> lastT;
@@ -37,18 +37,18 @@ void foo_drpc::on_init()
 		play_callback::flag_on_playback_edited |
 		play_callback::flag_on_playback_dynamic_info_track,
 		false);
-
 	discordInit();
 	initDiscordPresence();
 }
 
 void foo_drpc::on_quit()
 {
+	Discord_ClearPresence();
 	Discord_Shutdown();
 	static_api_ptr_t<play_callback_manager>()->unregister_callback(this);
 }
 
-void foo_drpc::on_playback_starting(play_control::t_track_command command, bool pause)
+void foo_drpc::on_playback_starting(playback_control::t_track_command command, bool pause)
 {
 	if (!connected) return;
 
@@ -61,9 +61,12 @@ void foo_drpc::on_playback_starting(play_control::t_track_command command, bool 
 	{
 		switch (command)
 		{
-		case play_control::track_command_play:
-		case play_control::track_command_resume:
-		case play_control::track_command_settrack:
+		case playback_control::track_command_play:
+		case playback_control::track_command_next:
+		case playback_control::track_command_prev:
+		case playback_control::track_command_resume:
+		case playback_control::track_command_rand:
+		case playback_control::track_command_settrack:
 			discordPresence.state = "Listening";
 			discordPresence.smallImageKey = "play";
 			break;
@@ -79,15 +82,15 @@ void foo_drpc::on_playback_starting(play_control::t_track_command command, bool 
 	// updateDiscordPresence();
 }
 
-void foo_drpc::on_playback_stop(play_control::t_stop_reason reason)
+void foo_drpc::on_playback_stop(playback_control::t_stop_reason reason)
 {
 	if (!connected) return;
 
 	switch (reason)
 	{
-	case play_control::stop_reason_user:
-	case play_control::stop_reason_eof:
-	case play_control::stop_reason_shutting_down:
+	case playback_control::stop_reason_user:
+	case playback_control::stop_reason_eof:
+	case playback_control::stop_reason_shutting_down:
 		discordPresence.state = "Stopped";
 		discordPresence.smallImageKey = "stop";
 		break;
@@ -151,7 +154,7 @@ void foo_drpc::initDiscordPresence()
 {
 	memset(&discordPresence, 0, sizeof(discordPresence));
 	discordPresence.state = "Initialized";
-	discordPresence.details = "topkek";
+	discordPresence.details = "Waiting ...";
 	discordPresence.largeImageKey = "logo";
 	discordPresence.smallImageKey = "stop";
 	// discordPresence.partyId = "party1234";
@@ -172,11 +175,15 @@ void foo_drpc::updateDiscordPresence()
 		req = std::chrono::high_resolution_clock::now();
 		std::chrono::duration<double> elapsed = req - lastT;
 		// spam protection
-		if (elapsed.count() > 1.0) {
+		if (elapsed.count() > 0.42) {
 			Discord_UpdatePresence(&discordPresence);
 			lastT = std::chrono::high_resolution_clock::now();
 		}
 	}
+#ifdef DISCORD_DISABLE_IO_THREAD
+	Discord_UpdateConnection();
+#endif
+	Discord_RunCallbacks();
 }
 
 void connectedF()
