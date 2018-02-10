@@ -1,13 +1,13 @@
 # foo_drpc
 Foobar2000 music status for Discord Rich Presence!
 
-![compact view](/foo_drpc1.PNG?raw=true)
-![big view 1](/foo_drpc2.PNG?raw=true)
-![big view 2](/foo_drpc3.PNG?raw=true)
-
 # How to use
 1. Grab release, drop included **foo_drpc** directory in \%userdir%\AppData\Roaming\foobar2000\user-components\ or place included .dll Files in \foobar2000\components\.
 2. Add foobar2000 to discords detected games (Settings -> Games -> Add it).
+
+![compact view](/foo_drpc1.PNG?raw=true)
+![big view 1](/foo_drpc2.PNG?raw=true)
+![big view 2](/foo_drpc3.PNG?raw=true)
 
 # How to compile
 0. Compiled with VS 2017.
