@@ -93,9 +93,9 @@ void foo_drpc::on_playback_stop(playback_control::t_stop_reason reason)
 	case playback_control::stop_reason_shutting_down:
 		discordPresence.state = "Stopped";
 		discordPresence.smallImageKey = "stop";
+		updateDiscordPresence();
 		break;
 	}
-	updateDiscordPresence();
 }
 
 void foo_drpc::on_playback_pause(bool pause)
@@ -186,7 +186,7 @@ void foo_drpc::updateDiscordPresence()
 	Discord_RunCallbacks();
 }
 
-void connectedF()
+void connectedF(const DiscordUser* request)
 {
 	connected = true;
 }
