@@ -22,7 +22,7 @@ public:
 	virtual ~foo_drpc();
 
 	DiscordEventHandlers handlers;
-	DiscordRichPresence discordPresence;
+	DiscordRichPresence discord_presence;
 
 	// Otherwise known as CLIENT_ID by Discord documentation
 	const char* APPLICATION_ID = "FILL_IN_HERE";
@@ -48,14 +48,14 @@ public:
 	void on_volume_change(float p_new_val) {}
 
 	// Discord integration helpers
-	void discordInit();
-	void initDiscordPresence();
-	void updateDiscordPresence();
+	void discord_init();
+	void init_discord_presence();
+	void update_discord_presence();
 };
 
 // Discord callback functions for notifications of changes
-void connectedF(const DiscordUser* request);
-void disconnectedF(int errorCode, const char* message);
-void erroredF(int errorCode, const char* message);
+void callback_discord_connected(const DiscordUser* request);
+void callback_discord_disconnected(int errorCode, const char* message);
+void callback_discord_errored(int errorCode, const char* message);
 
 #endif

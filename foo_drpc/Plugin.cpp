@@ -39,18 +39,30 @@ void foo_drpc::on_init()
 		play_callback::flag_on_playback_dynamic_info_track,
 		false);
 
-	discordInit();
-	initDiscordPresence();
+	discord_init();
 }
 
-void foo_drpc::discordInit()
+void foo_drpc::discord_init()
 {
 	memset(&handlers, 0, sizeof(handlers));
-	handlers.ready = connectedF;
-	handlers.disconnected = disconnectedF;
-	handlers.errored = erroredF;
+	handlers.ready = callback_discord_connected;
+	handlers.disconnected = callback_discord_disconnected;
+	handlers.errored = callback_discord_errored;
 
 	Discord_Initialize(APPLICATION_ID, &handlers, 0, NULL);
+
+	init_discord_presence();
+}
+
+void foo_drpc::init_discord_presence()
+{
+	memset(&discord_presence, 0, sizeof(discord_presence));
+	discord_presence.state = "Initialized";
+	discord_presence.details = "Waiting ...";
+	discord_presence.largeImageKey = "logo";
+	discord_presence.smallImageKey = "stop";
+
+	update_discord_presence();
 }
 
 void foo_drpc::on_quit()
@@ -69,8 +81,8 @@ void foo_drpc::on_playback_starting(playback_control::t_track_command command, b
 
 	if (pause)
 	{
-		discordPresence.state = "Paused";
-		discordPresence.smallImageKey = "pause";
+		discord_presence.state = "Paused";
+		discord_presence.smallImageKey = "pause";
 	}
 	else
 	{
@@ -82,8 +94,8 @@ void foo_drpc::on_playback_starting(playback_control::t_track_command command, b
 		case playback_control::track_command_resume:
 		case playback_control::track_command_rand:
 		case playback_control::track_command_settrack:
-			discordPresence.state = "Listening";
-			discordPresence.smallImageKey = "play";
+			discord_presence.state = "Listening";
+			discord_presence.smallImageKey = "play";
 			break;
 		}
 	}
@@ -105,9 +117,9 @@ void foo_drpc::on_playback_stop(playback_control::t_stop_reason reason)
 	case playback_control::stop_reason_user:
 	case playback_control::stop_reason_eof:
 	case playback_control::stop_reason_shutting_down:
-		discordPresence.state = "Stopped";
-		discordPresence.smallImageKey = "stop";
-		updateDiscordPresence();
+		discord_presence.state = "Stopped";
+		discord_presence.smallImageKey = "stop";
+		update_discord_presence();
 		break;
 	}
 }
@@ -116,9 +128,9 @@ void foo_drpc::on_playback_pause(bool pause)
 {
 	if (!connected) return;
 
-	discordPresence.state = (pause ? "Paused" : "Listening");
-	discordPresence.smallImageKey = (pause ? "pause" : "play");
-	updateDiscordPresence();
+	discord_presence.state = (pause ? "Paused" : "Listening");
+	discord_presence.smallImageKey = (pause ? "pause" : "play");
+	update_discord_presence();
 }
 
 void foo_drpc::on_playback_new_track(metadb_handle_ptr track)
@@ -149,11 +161,11 @@ void foo_drpc::on_playback_new_track(metadb_handle_ptr track)
 		strncpy_s(details, format.get_ptr(), details_length);
 		details[details_length] = '\0';
 
-		discordPresence.state = "Listening";
-		discordPresence.smallImageKey = "play";
-		discordPresence.details = details;
+		discord_presence.state = "Listening";
+		discord_presence.smallImageKey = "play";
+		discord_presence.details = details;
 
-		updateDiscordPresence();
+		update_discord_presence();
 	}
 }
 
@@ -167,42 +179,31 @@ void foo_drpc::on_playback_dynamic_info_track(const file_info& info)
 	}
 }
 
-void foo_drpc::initDiscordPresence()
+void foo_drpc::update_discord_presence()
 {
-	memset(&discordPresence, 0, sizeof(discordPresence));
-	discordPresence.state = "Initialized";
-	discordPresence.details = "Waiting ...";
-	discordPresence.largeImageKey = "logo";
-	discordPresence.smallImageKey = "stop";
-
-	updateDiscordPresence();
-}
-
-void foo_drpc::updateDiscordPresence()
-{
-	Discord_UpdatePresence(&discordPresence);
+	Discord_UpdatePresence(&discord_presence);
 
 #ifdef DISCORD_DISABLE_IO_THREAD
 	Discord_UpdateConnection();
 #endif
 	Discord_RunCallbacks();
 
-	DEBUG_CONSOLE_PRINTF("Ran Discord presence update: %s, %s, %s, %s", discordPresence.state, discordPresence.details, discordPresence.largeImageKey, discordPresence.smallImageKey);
+	DEBUG_CONSOLE_PRINTF("Ran Discord presence update: %s, %s, %s, %s", discord_presence.state, discord_presence.details, discord_presence.largeImageKey, discord_presence.smallImageKey);
 }
 
-void connectedF(const DiscordUser* request)
+void callback_discord_connected(const DiscordUser* request)
 {
 	foo_interface.get_static_instance().connected = true;
 	DEBUG_CONSOLE_PRINTF("Connected to %s.", request->username);
 }
 
-void disconnectedF(int errorCode, const char* message)
+void callback_discord_disconnected(int errorCode, const char* message)
 {
 	foo_interface.get_static_instance().connected = false;
 	DEBUG_CONSOLE_PRINTF("Disconnected (%i): %s.", errorCode, message);
 }
 
-void erroredF(int errorCode, const char* message)
+void callback_discord_errored(int errorCode, const char* message)
 {
 	console::printf("*** Error %i: %s.", errorCode, message);
 }
