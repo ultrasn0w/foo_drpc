@@ -1,22 +1,22 @@
 #include "Plugin.h"
 
-
+// This tells Foobar2000 users what this component does
 DECLARE_COMPONENT_VERSION(
 "foo_drpc",
 "0.3",
 "Foobar2000 music status for Discord Rich Presence! (c) 2018 - ultrasn0w et al");
 
-static initquit_factory_t<foo_drpc> foo_interface;
+// This tells Foobar2000 what the file really is even if the user renames it (so only one is loaded)
+VALIDATE_COMPONENT_FILENAME(FOODRPC_NAME".dll");
 
-static bool errored; // Still kind of unused
-static bool connected;
-static bool first;
+static initquit_factory_t<foo_drpc> foo_interface;
 
 foo_drpc::foo_drpc()
 {
-	errored = false;
+	// This starts at true because 
+	//	1) Discord will not call its connected callback if you start this plugin and it's already running and
+	//	2) it costs us very little to write updates into the void
 	connected = true;
-	first = true;
 }
 
 foo_drpc::~foo_drpc()
@@ -26,6 +26,9 @@ foo_drpc::~foo_drpc()
 void foo_drpc::on_init()
 {
 	static_api_ptr_t<play_callback_manager> pcm;
+
+	DEBUG_CONSOLE_PRINTF("Initializing");
+
 	pcm->register_callback(
 		this,
 		play_callback::flag_on_playback_starting |
@@ -35,14 +38,28 @@ void foo_drpc::on_init()
 		play_callback::flag_on_playback_edited |
 		play_callback::flag_on_playback_dynamic_info_track,
 		false);
+
 	discordInit();
 	initDiscordPresence();
 }
 
+void foo_drpc::discordInit()
+{
+	memset(&handlers, 0, sizeof(handlers));
+	handlers.ready = connectedF;
+	handlers.disconnected = disconnectedF;
+	handlers.errored = erroredF;
+
+	Discord_Initialize(APPLICATION_ID, &handlers, 0, NULL);
+}
+
 void foo_drpc::on_quit()
 {
+	DEBUG_CONSOLE_PRINTF("Unloading");
+
 	Discord_ClearPresence();
 	Discord_Shutdown();
+
 	static_api_ptr_t<play_callback_manager>()->unregister_callback(this);
 }
 
@@ -77,7 +94,6 @@ void foo_drpc::on_playback_starting(playback_control::t_track_command command, b
 	{
 		on_playback_new_track(track);
 	}
-	// updateDiscordPresence();
 }
 
 void foo_drpc::on_playback_stop(playback_control::t_stop_reason reason)
@@ -124,17 +140,20 @@ void foo_drpc::on_playback_new_track(metadb_handle_ptr track)
 			nullptr,
 			playback_control::display_level_titles);
 
-		if (format.get_length() + 1 <= 128) {
-			static char nya[128];
-			size_t destination_size = sizeof(nya);
-			strncpy_s(nya, format.get_ptr(), destination_size);
-			nya[destination_size - 1] = '\0';
+		// If the details size is bigger than MAX_DETAILS_LENGTH chars, truncate it
+		const size_t MAX_DETAILS_LENGTH = 128;
 
-			discordPresence.state = "Listening";
-			discordPresence.smallImageKey = "play";
-			discordPresence.details = nya;
-			updateDiscordPresence();
-		}
+		size_t details_length = min(format.get_length(), MAX_DETAILS_LENGTH-1); // -1 to give us room for the '\0' in the longest case
+		static char details[MAX_DETAILS_LENGTH];
+
+		strncpy_s(details, format.get_ptr(), details_length);
+		details[details_length] = '\0';
+
+		discordPresence.state = "Listening";
+		discordPresence.smallImageKey = "play";
+		discordPresence.details = details;
+
+		updateDiscordPresence();
 	}
 }
 
@@ -167,29 +186,23 @@ void foo_drpc::updateDiscordPresence()
 	Discord_UpdateConnection();
 #endif
 	Discord_RunCallbacks();
+
+	DEBUG_CONSOLE_PRINTF("Ran Discord presence update: %s, %s, %s, %s", discordPresence.state, discordPresence.details, discordPresence.largeImageKey, discordPresence.smallImageKey);
 }
 
 void connectedF(const DiscordUser* request)
 {
-	connected = true;
+	foo_interface.get_static_instance().connected = true;
+	DEBUG_CONSOLE_PRINTF("Connected to %s.", request->username);
 }
 
 void disconnectedF(int errorCode, const char* message)
 {
-	connected = false;
+	foo_interface.get_static_instance().connected = false;
+	DEBUG_CONSOLE_PRINTF("Disconnected (%i): %s.", errorCode, message);
 }
 
 void erroredF(int errorCode, const char* message)
 {
-	errored = true;
-}
-
-void foo_drpc::discordInit()
-{
-	memset(&handlers, 0, sizeof(handlers));
-	handlers.ready = connectedF;
-	handlers.disconnected = disconnectedF;
-	handlers.errored = erroredF;
-
-	Discord_Initialize(APPLICATION_ID, &handlers, 0, NULL);
+	console::printf("*** Error %i: %s.", errorCode, message);
 }
