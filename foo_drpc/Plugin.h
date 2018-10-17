@@ -3,7 +3,6 @@
 
 #include "../../SDK/foobar2000.h"
 #include "discord-rpc.h"
-#include <chrono>
 
 class foo_drpc :
 	public initquit,
@@ -11,7 +10,7 @@ class foo_drpc :
 {
 public:
 	foo_drpc();
-	~foo_drpc();
+	virtual ~foo_drpc();
 
 	DiscordEventHandlers handlers;
 	DiscordRichPresence discordPresence;
@@ -24,8 +23,6 @@ public:
 	void discordInit();
 	void initDiscordPresence();
 	void updateDiscordPresence();
-
-	LPSTR UnicodeToAnsi(LPCWSTR s);
 
 	void on_playback_starting(play_control::t_track_command command, bool paused);
 	void on_playback_stop(play_control::t_stop_reason reason);

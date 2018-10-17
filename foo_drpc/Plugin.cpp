@@ -1,15 +1,13 @@
-#include <cmath>
 #include "Plugin.h"
 
 
 DECLARE_COMPONENT_VERSION(
 "foo_drpc",
 "0.3",
-"Foobar2000 music status for Discord Rich Presence! (c) 2018 - ultrasn0w");
+"Foobar2000 music status for Discord Rich Presence! (c) 2018 - ultrasn0w et al");
 
 static initquit_factory_t<foo_drpc> foo_interface;
-static std::chrono::time_point<std::chrono::high_resolution_clock> lastT;
-static std::chrono::time_point<std::chrono::high_resolution_clock> req;
+
 static bool errored; // Still kind of unused
 static bool connected;
 static bool first;
@@ -157,29 +155,14 @@ void foo_drpc::initDiscordPresence()
 	discordPresence.details = "Waiting ...";
 	discordPresence.largeImageKey = "logo";
 	discordPresence.smallImageKey = "stop";
-	// discordPresence.partyId = "party1234";
-	// discordPresence.partySize = 1;
-	// discordPresence.partyMax = 6;
 
 	updateDiscordPresence();
 }
 
 void foo_drpc::updateDiscordPresence()
 {
-	if (first) {
-		lastT = std::chrono::high_resolution_clock::now();
-		first = false;
-		Discord_UpdatePresence(&discordPresence);
-	}
-	else {
-		req = std::chrono::high_resolution_clock::now();
-		std::chrono::duration<double> elapsed = req - lastT;
-		// spam protection
-		if (elapsed.count() > 0.42) {
-			Discord_UpdatePresence(&discordPresence);
-			lastT = std::chrono::high_resolution_clock::now();
-		}
-	}
+	Discord_UpdatePresence(&discordPresence);
+
 #ifdef DISCORD_DISABLE_IO_THREAD
 	Discord_UpdateConnection();
 #endif
@@ -207,23 +190,6 @@ void foo_drpc::discordInit()
 	handlers.ready = connectedF;
 	handlers.disconnected = disconnectedF;
 	handlers.errored = erroredF;
-	// handlers.joinGame = [](const char* joinSecret) {};
-	// handlers.spectateGame = [](const char* spectateSecret) {};
-	// handlers.joinRequest = [](const DiscordJoinRequest* request) {};
-	Discord_Initialize(APPLICATION_ID, &handlers, 1, NULL);
-}
 
-// thx SuperKoko (unused)
-LPSTR foo_drpc::UnicodeToAnsi(LPCWSTR s)
-{
-	if (s == NULL) return NULL;
-	int cw = lstrlenW(s);
-	if (cw == 0) { CHAR *psz = new CHAR[1]; *psz = '\0'; return psz; }
-	int cc = WideCharToMultiByte(CP_UTF8, 0, s, cw, NULL, 0, NULL, NULL);
-	if (cc == 0) return NULL;
-	CHAR *psz = new CHAR[cc + 1];
-	cc = WideCharToMultiByte(CP_UTF8, 0, s, cw, psz, cc, NULL, NULL);
-	if (cc == 0) { delete[] psz; return NULL; }
-	psz[cc] = '\0';
-	return psz;
+	Discord_Initialize(APPLICATION_ID, &handlers, 0, NULL);
 }

@@ -1,0 +1,11 @@
+logo.png:
+	Original: https://en.wikipedia.org/wiki/File:Foobar2000_logo_2014.png
+	Author: Florian Trendelenburg
+	License: Public Domain
+	Changes: Resized, borders changed
+
+play.png, pause.png, stop.png:
+	Original: http://pluspng.com/png-24756.html
+	Author: Unlisted
+	License: Attribution
+	Changes: Split apart, resized, borders changed
