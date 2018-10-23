@@ -161,8 +161,8 @@ void foo_drpc::on_playback_new_track(metadb_handle_ptr track)
 		strncpy_s(details, format.get_ptr(), details_length);
 		details[details_length] = '\0';
 
-		discord_presence.state = "Listening";
-		discord_presence.smallImageKey = "play";
+		discord_presence.state = (pbc->is_paused() ? "Paused" : "Listening");
+		discord_presence.smallImageKey = (pbc->is_paused() ? "pause" : "play");
 		discord_presence.details = details;
 
 		update_discord_presence();

@@ -3,6 +3,7 @@
 
 #include "../../SDK/foobar2000.h"
 #include "discord-rpc.h"
+#include "secret.h"
 
 #define FOODRPC_NAME "foo_drpc"
 
@@ -25,7 +26,8 @@ public:
 	DiscordRichPresence discord_presence;
 
 	// Otherwise known as CLIENT_ID by Discord documentation
-	const char* APPLICATION_ID = "FILL_IN_HERE";
+	// SET THIS IN "secret.h"
+	const char* APPLICATION_ID = _FOODRPC_SECRED_APPLICATION_ID;
 
 	bool connected; // If Discord integrator is connected to a running Discord instance
 
