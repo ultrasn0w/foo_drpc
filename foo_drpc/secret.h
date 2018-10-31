@@ -1,0 +1,6 @@
+#ifndef FOODRPC_SECRET_H_
+#define FOODRPC_SECRET_H_
+
+#define _FOODRPC_SECRED_APPLICATION_ID "FILL_ME_IN"
+
+#endif

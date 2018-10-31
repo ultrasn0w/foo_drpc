@@ -18,10 +18,8 @@ I'm currently no longer actively developing this, but will still merge PRs and r
 2. Drop contents from repository in the prevoiusly created \foo_drpc\.
 3. Grab release from https://github.com/discordapp/discord-rpc and place \lib\ with contained discord-rpc.lib in \foo_drpc\.
 4. Do the same with \include\discord-rpc.h but this time directly into \foo_drpc\.
-5. Get/Create a Discord Application ID which resembles your App at Discords end and fill in to \Plugin.h.
-6. Upload 1 large asset for your App with the key "logo", 3 small ones with keys "play", "stop" and "pause".
+5. Get/Create a Discord Application ID which resembles your App at Discords end and fill in APPLICATION_ID in \foo_drpc\secret.h.
+6. Upload 1 large asset for your App with the key "logo", 3 small ones with keys "play", "stop" and "pause". Use the files in optional_images if you like.
 
 # License and Warranty
 Check [LICENSE](../master/LICENSE).
-
-Note: Even though I build in a "spam protection" to avoid lots of presence updates being send to the discord servers, I can't guarantee and am not responsible for any actions that may be taken against your account. (Nothing happened during personal testing)

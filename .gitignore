@@ -1,0 +1,7 @@
+.vs
+Debug
+Release
+foo_drpc/Debug
+foo_drpc/Release
+foo_drpc/discord-rpc.h
+foo_drpc/lib
