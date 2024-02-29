@@ -3,6 +3,7 @@ Foobar2000 music status for Discord Rich Presence!
 
 # Notice
 I'm currently no longer actively developing this, but will still merge PRs and reference releases at the [release page](https://github.com/ultrasn0w/foo_drpc/releases).
+
 You mabe also want to check out [this wonderful alternative](https://github.com/TheQwertiest/foo_discord_rich) that was made much more recently.
 
 # How to use
