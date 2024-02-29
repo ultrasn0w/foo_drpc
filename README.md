@@ -4,7 +4,7 @@ Foobar2000 music status for Discord Rich Presence!
 # Notice
 I'm currently no longer actively developing this, but will still merge PRs and reference releases at the [release page](https://github.com/ultrasn0w/foo_drpc/releases).
 
-You mabe also want to check out [this wonderful alternative](https://github.com/TheQwertiest/foo_discord_rich) that was made much more recently.
+You mabe also want to check out [this wonderful alternative](https://github.com/TheQwertiest/foo_discord_rich) that was updated much more recently.
 
 # How to use
 1. Grab [release](https://github.com/ultrasn0w/foo_drpc/releases), drop included **foo_drpc** directory in \%userdir%\AppData\Roaming\foobar2000\user-components\ (if you have not moved your AppData somewhere else) or place included .dll Files in \foobar2000\components\.
